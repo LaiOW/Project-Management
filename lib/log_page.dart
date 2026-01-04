@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'app_theme.dart';
 import 'glucose_data.dart';
 import 'meal_data.dart';
+import 'medication_data.dart';
+import 'package:uuid/uuid.dart';
 
 class LogPage extends StatefulWidget {
   final Function onSave;
@@ -435,7 +437,6 @@ class _MealTabState extends State<_MealTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 10),
                       Text(
                         "Log Your Meal",
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -663,71 +664,396 @@ class _MealTabState extends State<_MealTab> {
   }
 }
 
-class _MedicationTab extends StatelessWidget {
+class _MedicationTab extends StatefulWidget {
   const _MedicationTab();
 
   @override
+  State<_MedicationTab> createState() => _MedicationTabState();
+}
+
+class _MedicationTabState extends State<_MedicationTab> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _dosageController = TextEditingController();
+  final TextEditingController _unitController = TextEditingController(text: "mg");
+  
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  bool _isBeforeMeal = true;
+  
+  final MedicationRepository _repository = MedicationRepository();
+  List<MedicationEntry> _medications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMedications();
+  }
+
+  Future<void> _loadMedications() async {
+    final list = await _repository.getMedications();
+    if (mounted) {
+      setState(() {
+        _medications = list;
+      });
+    }
+  }
+
+  Future<void> _onAddReminder() async {
+    if (_nameController.text.isEmpty || _dosageController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    final entry = MedicationEntry(
+      id: const Uuid().v4(),
+      name: _nameController.text,
+      dosage: _dosageController.text,
+      unit: _unitController.text,
+      hour: _selectedTime.hour,
+      minute: _selectedTime.minute,
+      isBeforeMeal: _isBeforeMeal,
+      isEnabled: true,
+    );
+
+    await _repository.saveMedication(entry);
+    _loadMedications();
+    
+    // Reset form
+    _nameController.clear();
+    _dosageController.clear();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reminder Added!')),
+      );
+    }
+  }
+
+  Future<void> _onToggle(String id, bool value) async {
+    await _repository.toggleMedication(id, value);
+    _loadMedications();
+  }
+  
+  Future<void> _onDelete(String id) async {
+    await _repository.deleteMedication(id);
+    _loadMedications();
+  }
+
+  Future<void> _pickTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Icon(Icons.medication, size: 80, color: AppColors.primary),
-          const SizedBox(height: 20),
-          Text(
-            "Log Medication",
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Medication Name",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: "Dosage",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                    filled: true,
-                    fillColor: Colors.white,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            // Top Section: Input Form (Flex 6)
+            Expanded(
+              flex: 6,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        "Set Med Reminder",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Name Input
+                      TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          hintText: "Medication Name (e.g. Metformin)",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                          prefixIcon: const Icon(Icons.medication, color: AppColors.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Dosage Row
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: _dosageController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: "Dosage",
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _unitController.text,
+                                  isExpanded: true,
+                                  items: ["mg", "ml", "units", "pills"].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      _unitController.text = newValue!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Time & Timing Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _pickTime,
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.access_time, color: Colors.redAccent),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _selectedTime.format(context),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.text),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  _buildTimingToggle("Before", true),
+                                  _buildTimingToggle("After", false),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _onAddReminder,
+                          child: const Text("Add Reminder", style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-               Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Unit (e.g. mg, units)",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                    filled: true,
-                    fillColor: Colors.white,
+            ),
+            
+            // Bottom Section: Daily Reminders List (Flex 4)
+            Expanded(
+              flex: 4,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
                   ),
+                  boxShadow: [
+                     BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Daily Reminders",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: _medications.isEmpty 
+                        ? const Center(child: Text("No reminders set", style: TextStyle(color: Colors.grey)))
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            itemCount: _medications.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              return _buildReminderCard(_medications[index]);
+                            },
+                          ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTimingToggle(String label, bool isBefore) {
+    bool isSelected = _isBeforeMeal == isBefore;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _isBeforeMeal = isBefore;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(height: 30),
-           SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Medication logged! (Mock)')),
-                );
-              },
-              child: const Text("Save Medication", style: TextStyle(fontSize: 18)),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? AppColors.primary : Colors.grey,
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReminderCard(MedicationEntry entry) {
+    return Dismissible(
+      key: Key(entry.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.redAccent,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      onDismissed: (direction) {
+        _onDelete(entry.id);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white, // In a white container, but let's give it a slight border or background distinction from list bg
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.text),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      "${entry.dosage} ${entry.unit}",
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: entry.isBeforeMeal ? Colors.orange.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        entry.isBeforeMeal ? "Before Meal" : "After Meal",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: entry.isBeforeMeal ? Colors.orange : Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  "${entry.hour.toString().padLeft(2, '0')}:${entry.minute.toString().padLeft(2, '0')}",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.redAccent,
+                  ),
+                ),
+                Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: entry.isEnabled,
+                    activeColor: AppColors.primary,
+                    onChanged: (val) => _onToggle(entry.id, val),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
