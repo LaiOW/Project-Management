@@ -109,15 +109,16 @@ class _LogPageState extends State<LogPage> {
       builder: (context, constraints) {
         return Column(
           children: [
-            // Top Section: Input (Less flex to save space for list)
+            // Top Section: Input (Flex 6)
             Expanded(
-              flex: 4, 
+              flex: 6, 
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 10),
                       Text(
                         'Enter Glucose Level',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -128,7 +129,7 @@ class _LogPageState extends State<LogPage> {
                       const SizedBox(height: 20),
                       // Input Field with System Keyboard
                       Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
@@ -178,21 +179,22 @@ class _LogPageState extends State<LogPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       Text(
                         _feedbackMessage,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.w600,
                           color: _feedbackColor,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
+                        height: 56, // Taller button
                         child: ElevatedButton(
                           onPressed: _onSave,
-                          child: const Text("Save Reading"),
+                          child: const Text("Save Reading", style: TextStyle(fontSize: 18)),
                         ),
                       ),
                     ],
@@ -201,12 +203,12 @@ class _LogPageState extends State<LogPage> {
               ),
             ),
             
-            // Bottom Section: Today Entries (More flex)
+            // Bottom Section: Today Entries (Flex 4 - approx 40%)
             Expanded(
-              flex: 6,
+              flex: 4,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -227,7 +229,7 @@ class _LogPageState extends State<LogPage> {
                     const Text(
                       "Today's Entries",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.text,
                       ),
@@ -237,8 +239,9 @@ class _LogPageState extends State<LogPage> {
                       child: _todayReadings.isEmpty 
                         ? const Center(child: Text("No readings today", style: TextStyle(color: Colors.grey)))
                         : ListView.separated(
+                            padding: const EdgeInsets.only(bottom: 20),
                             itemCount: _todayReadings.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 10),
+                            separatorBuilder: (context, index) => const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final reading = _todayReadings[_todayReadings.length - 1 - index];
                               return _buildEntryRow(reading);
@@ -274,10 +277,10 @@ class _LogPageState extends State<LogPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: statusColor.withOpacity(0.3)),
       ),
       child: Row(
@@ -288,7 +291,7 @@ class _LogPageState extends State<LogPage> {
               Text(
                 "${reading.value.toStringAsFixed(1)} mmol/L",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.text,
                 ),
@@ -307,14 +310,14 @@ class _LogPageState extends State<LogPage> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               statusText,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 10,
               ),
             ),
           ),
