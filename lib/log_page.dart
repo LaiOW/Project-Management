@@ -12,11 +12,66 @@ class LogPage extends StatefulWidget {
   State<LogPage> createState() => _LogPageState();
 }
 
-class _LogPageState extends State<LogPage> {
-  // Use a controller to manage the input field
+class _LogPageState extends State<LogPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          color: AppColors.background,
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: AppColors.primary,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: Colors.grey,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            tabs: const [
+              Tab(text: "Glucose"),
+              Tab(text: "Meal"),
+              Tab(text: "Meds"),
+            ],
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _GlucoseTab(onSave: widget.onSave),
+              const _MealTab(),
+              const _MedicationTab(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GlucoseTab extends StatefulWidget {
+  final Function onSave;
+  const _GlucoseTab({required this.onSave});
+
+  @override
+  State<_GlucoseTab> createState() => _GlucoseTabState();
+}
+
+class _GlucoseTabState extends State<_GlucoseTab> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  
   final GlucoseRepository _repository = GlucoseRepository();
   String _feedbackMessage = "Enter value";
   Color _feedbackColor = Colors.grey;
@@ -26,7 +81,6 @@ class _LogPageState extends State<LogPage> {
   void initState() {
     super.initState();
     _loadTodayReadings();
-    // Listen to changes in the text field to update feedback
     _controller.addListener(_updateFeedback);
   }
 
@@ -59,7 +113,6 @@ class _LogPageState extends State<LogPage> {
     double? value = double.tryParse(text);
     if (value == null) return;
 
-    // mmol/L Ranges
     String newMessage;
     Color newColor;
 
@@ -88,10 +141,13 @@ class _LogPageState extends State<LogPage> {
     double? value = double.tryParse(_controller.text);
     if (value != null) {
       await _repository.saveReading(value);
-      _loadTodayReadings(); // Refresh list immediately
-      widget.onSave();
+      _loadTodayReadings();
+      widget.onSave(); // Usually this switches tab, but maybe we want to stay?
+      // For now, let's just clear input. The parent might switch tabs if logic is kept.
+      // If we want to stay, maybe don't call widget.onSave() or change its behavior.
+      // Assuming user wants to see graph after glucose log, we keep it. 
+      // But for consistency in tab UI, maybe just toast.
       
-      // Clear input and hide keyboard
       _controller.clear();
       _focusNode.unfocus();
       
@@ -109,7 +165,6 @@ class _LogPageState extends State<LogPage> {
       builder: (context, constraints) {
         return Column(
           children: [
-            // Top Section: Input (Flex 6)
             Expanded(
               flex: 6, 
               child: SingleChildScrollView(
@@ -127,7 +182,6 @@ class _LogPageState extends State<LogPage> {
                             ),
                       ),
                       const SizedBox(height: 20),
-                      // Input Field with System Keyboard
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
                         decoration: BoxDecoration(
@@ -191,7 +245,7 @@ class _LogPageState extends State<LogPage> {
                       const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
-                        height: 56, // Taller button
+                        height: 56,
                         child: ElevatedButton(
                           onPressed: _onSave,
                           child: const Text("Save Reading", style: TextStyle(fontSize: 18)),
@@ -202,8 +256,6 @@ class _LogPageState extends State<LogPage> {
                 ),
               ),
             ),
-            
-            // Bottom Section: Today Entries (Flex 4 - approx 40%)
             Expanded(
               flex: 4,
               child: Container(
@@ -319,6 +371,136 @@ class _LogPageState extends State<LogPage> {
                 fontWeight: FontWeight.bold,
                 fontSize: 10,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealTab extends StatelessWidget {
+  const _MealTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const Icon(Icons.restaurant_menu, size: 80, color: AppColors.primary),
+          const SizedBox(height: 20),
+          Text(
+            "Log Your Meal",
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            decoration: InputDecoration(
+              hintText: "What did you eat?",
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            maxLines: 3,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: "Carbs (g)",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+           SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Meal logged! (Mock)')),
+                );
+              },
+              child: const Text("Save Meal", style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MedicationTab extends StatelessWidget {
+  const _MedicationTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const Icon(Icons.medication, size: 80, color: AppColors.primary),
+          const SizedBox(height: 20),
+          Text(
+            "Log Medication",
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            decoration: InputDecoration(
+              hintText: "Medication Name",
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: "Dosage",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+               Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Unit (e.g. mg, units)",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+           SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Medication logged! (Mock)')),
+                );
+              },
+              child: const Text("Save Medication", style: TextStyle(fontSize: 18)),
             ),
           ),
         ],

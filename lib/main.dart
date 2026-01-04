@@ -40,10 +40,6 @@ class _MainScreenState extends State<MainScreen> {
     });
     // If switching to chart tab, refresh it
     if (index == 1) {
-       // Ideally ChartPage refreshes on initState, but if it stays alive we might need to trigger it.
-       // For simple switching, the widget might be rebuilt.
-       // If we use IndexedStack, state is preserved.
-       // Let's assume re-building is fine or we can trigger refresh.
        (_chartKey.currentState as dynamic)?.refresh(); 
     }
   }
@@ -53,7 +49,6 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _currentIndex = 1;
     });
-    // Trigger refresh after a short delay to ensure widget is built/ready if we were not there
     Future.delayed(const Duration(milliseconds: 100), () {
       (_chartKey.currentState as dynamic)?.refresh();
     });
@@ -61,16 +56,24 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // We use a body that changes based on index
     final List<Widget> pages = [
       LogPage(onSave: _onLogSaved),
       ChartPage(key: _chartKey),
     ];
 
+    // Determine title based on tab
+    String title = "Trends";
+    if (_currentIndex == 0) {
+      // For Log page, the title is now handled by the Tabs inside LogPage? 
+      // Or we can just keep a generic title "Log Entry"
+      title = "Log Entry";
+    }
+
     return Scaffold(
-      // App bar can be simple or hidden. Let's keep it minimal.
+      // AppBar removed here because LogPage now has its own Tabs that look better without a duplicate AppBar title above it.
+      // Or we can keep it simple. Let's keep it but make it minimal.
       appBar: AppBar(
-        title: Text(_currentIndex == 0 ? "Log Glucose" : "Trends"),
+        title: Text(title),
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
