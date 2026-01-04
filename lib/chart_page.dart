@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 import 'app_theme.dart';
 import 'glucose_data.dart';
 import 'dart:math';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class ChartPage extends StatefulWidget {
   const ChartPage({super.key});
@@ -72,6 +76,81 @@ class _ChartPageState extends State<ChartPage> {
       _selectedPeriod = period;
       _filterData();
     });
+  }
+
+  Future<Uint8List> _generatePdf() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Header(
+                level: 0,
+                child: pw.Text("Glucose Report - $_selectedPeriod",
+                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text("Generated on: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}"),
+              pw.SizedBox(height: 20),
+              if (_filteredReadings.isEmpty)
+                pw.Text("No data available for this period.")
+              else
+                pw.Table.fromTextArray(
+                  context: context,
+                  headers: ["Date & Time", "Level (mmol/L)", "Status"],
+                  data: _filteredReadings.map((r) {
+                    String status = "Normal";
+                    if (r.value < 4.0) status = "Low";
+                    else if (r.value > 10.0) status = "Very High";
+                    else if (r.value > 7.8) status = "High";
+                    
+                    return [
+                      DateFormat('yyyy-MM-dd HH:mm').format(r.timestamp),
+                      r.value.toStringAsFixed(1),
+                      status
+                    ];
+                  }).toList(),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  Future<void> _onGeneratePdf() async {
+    if (_filteredReadings.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No data to generate PDF')),
+      );
+      return;
+    }
+    
+    // Preview the PDF
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => _generatePdf(),
+    );
+  }
+
+  Future<void> _onDownloadPdf() async {
+     if (_filteredReadings.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No data to download')),
+      );
+      return;
+    }
+
+    // Share the PDF (which allows saving to files)
+    await Printing.sharePdf(
+      bytes: await _generatePdf(), 
+      filename: 'glucose_report.pdf'
+    );
   }
 
   @override
@@ -170,7 +249,7 @@ class _ChartPageState extends State<ChartPage> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: _onGeneratePdf,
                   icon: const Icon(Icons.picture_as_pdf),
                   label: const Text("Generate PDF"),
                   style: OutlinedButton.styleFrom(
@@ -183,7 +262,7 @@ class _ChartPageState extends State<ChartPage> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: _onDownloadPdf,
                   icon: const Icon(Icons.download),
                   label: const Text("Download"),
                   style: ElevatedButton.styleFrom(
