@@ -45,7 +45,7 @@ class _LogPageState extends State<LogPage> with SingleTickerProviderStateMixin {
             tabs: const [
               Tab(text: "Glucose"),
               Tab(text: "Meal"),
-              Tab(text: "Medication"), // Changed "Meds" to "Medication"
+              Tab(text: "Medication"),
             ],
           ),
         ),
@@ -772,7 +772,7 @@ class _MedicationTabState extends State<_MedicationTab> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center, // Center vertically like Glucose/Meal
                     children: [
                       Text(
                         "Set Med Reminder",
@@ -788,7 +788,7 @@ class _MedicationTabState extends State<_MedicationTab> {
                       TextField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          hintText: "Medication Name (e.g. Metformin)",
+                          hintText: "Medication Name",
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -891,10 +891,11 @@ class _MedicationTabState extends State<_MedicationTab> {
                       
                       const SizedBox(height: 24),
                       SizedBox(
-                        height: 50,
+                        width: double.infinity, // Full width button
+                        height: 56, // Taller button
                         child: ElevatedButton(
                           onPressed: _onAddReminder,
-                          child: const Text("Add Reminder", style: TextStyle(fontSize: 16)),
+                          child: const Text("Add Reminder", style: TextStyle(fontSize: 18)),
                         ),
                       ),
                     ],
