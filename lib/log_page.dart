@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'app_theme.dart';
 import 'glucose_data.dart';
+import 'meal_data.dart';
 
 class LogPage extends StatefulWidget {
   final Function onSave;
@@ -142,11 +143,7 @@ class _GlucoseTabState extends State<_GlucoseTab> {
     if (value != null) {
       await _repository.saveReading(value);
       _loadTodayReadings();
-      widget.onSave(); // Usually this switches tab, but maybe we want to stay?
-      // For now, let's just clear input. The parent might switch tabs if logic is kept.
-      // If we want to stay, maybe don't call widget.onSave() or change its behavior.
-      // Assuming user wants to see graph after glucose log, we keep it. 
-      // But for consistency in tab UI, maybe just toast.
+      widget.onSave();
       
       _controller.clear();
       _focusNode.unfocus();
@@ -379,58 +376,285 @@ class _GlucoseTabState extends State<_GlucoseTab> {
   }
 }
 
-class _MealTab extends StatelessWidget {
+class _MealTab extends StatefulWidget {
   const _MealTab();
 
   @override
+  State<_MealTab> createState() => _MealTabState();
+}
+
+class _MealTabState extends State<_MealTab> {
+  final TextEditingController _weightController = TextEditingController(); // Empty initial value
+  String _selectedIntensity = "Medium";
+  final MealRepository _repository = MealRepository();
+  List<MealEntry> _todayEntries = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayEntries();
+  }
+
+  Future<void> _loadTodayEntries() async {
+    final entries = await _repository.getEntriesForToday();
+    if (mounted) {
+      setState(() {
+        _todayEntries = entries;
+      });
+    }
+  }
+
+  Future<void> _onSave() async {
+    if (_weightController.text.isEmpty) return;
+    int? weight = int.tryParse(_weightController.text);
+    if (weight != null) {
+      await _repository.saveMeal(weight, _selectedIntensity);
+      _loadTodayEntries();
+      
+      _weightController.clear();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Meal logged successfully!')),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Icon(Icons.restaurant_menu, size: 80, color: AppColors.primary),
-          const SizedBox(height: 20),
-          Text(
-            "Log Your Meal",
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            decoration: InputDecoration(
-              hintText: "What did you eat?",
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              filled: true,
-              fillColor: Colors.white,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            Expanded(
+              flex: 6,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 10),
+                      Text(
+                        "Log Your Meal",
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      // Input Field only (Centered)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.primary, width: 2),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IntrinsicWidth(
+                              child: TextField(
+                                controller: _weightController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.text),
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "--",
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 16),
+                              child: Text(
+                                "grams",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      // Intensity Selector
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            _buildIntensityOption("Low"),
+                            _buildIntensityOption("Medium"),
+                            _buildIntensityOption("High"),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _onSave,
+                          child: const Text("Save Meal", style: TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            maxLines: 3,
+            
+            // Bottom Section: Today's Entries (Same style as Glucose)
+            Expanded(
+              flex: 4,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                     BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, -5),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Today's Entries",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: _todayEntries.isEmpty 
+                        ? const Center(child: Text("No meals today", style: TextStyle(color: Colors.grey)))
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            itemCount: _todayEntries.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final entry = _todayEntries[_todayEntries.length - 1 - index];
+                              return _buildMealEntryRow(entry);
+                            },
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildIntensityOption(String label) {
+    bool isSelected = _selectedIntensity == label;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedIntensity = label;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected ? [
+              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
+            ] : [],
           ),
-          const SizedBox(height: 16),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isSelected ? AppColors.primary : Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealEntryRow(MealEntry entry) {
+    Color intensityColor;
+    if (entry.intensity == "Low") intensityColor = AppColors.statusNormal;
+    else if (entry.intensity == "Medium") intensityColor = AppColors.statusHigh;
+    else intensityColor = AppColors.statusVeryHigh;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: intensityColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: intensityColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
           Row(
             children: [
-              Expanded(
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: "Carbs (g)",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+              Text(
+                "${entry.weight} g",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                DateFormat('HH:mm').format(entry.timestamp),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 30),
-           SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Meal logged! (Mock)')),
-                );
-              },
-              child: const Text("Save Meal", style: TextStyle(fontSize: 18)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: intensityColor,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              entry.intensity,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
             ),
           ),
         ],
