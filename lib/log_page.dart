@@ -45,7 +45,7 @@ class _LogPageState extends State<LogPage> with SingleTickerProviderStateMixin {
             tabs: const [
               Tab(text: "Glucose"),
               Tab(text: "Meal"),
-              Tab(text: "Meds"),
+              Tab(text: "Medication"), // Changed "Meds" to "Medication"
             ],
           ),
         ),
@@ -705,6 +705,14 @@ class _MedicationTabState extends State<_MedicationTab> {
       return;
     }
 
+    // Validation: Check if dosage is numeric
+    if (double.tryParse(_dosageController.text) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dosage must be a number')),
+      );
+      return;
+    }
+
     final entry = MedicationEntry(
       id: const Uuid().v4(),
       name: _nameController.text,
@@ -796,7 +804,7 @@ class _MedicationTabState extends State<_MedicationTab> {
                             flex: 2,
                             child: TextField(
                               controller: _dosageController,
-                              keyboardType: TextInputType.number,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true), // Force number keyboard
                               decoration: InputDecoration(
                                 hintText: "Dosage",
                                 filled: true,
