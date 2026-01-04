@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'app_theme.dart';
 import 'glucose_data.dart';
 
@@ -12,64 +13,88 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPageState extends State<LogPage> {
-  String _currentInput = "";
+  // Use a controller to manage the input field
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  
   final GlucoseRepository _repository = GlucoseRepository();
   String _feedbackMessage = "Enter value";
   Color _feedbackColor = Colors.grey;
+  List<GlucoseReading> _todayReadings = [];
 
-  void _onDigitPress(String digit) {
-    if (_currentInput.length < 3) {
-      setState(() {
-        _currentInput += digit;
-        _updateFeedback();
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayReadings();
+    // Listen to changes in the text field to update feedback
+    _controller.addListener(_updateFeedback);
   }
 
-  void _onBackspace() {
-    if (_currentInput.isNotEmpty) {
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadTodayReadings() async {
+    final readings = await _repository.getReadingsForToday();
+    if (mounted) {
       setState(() {
-        _currentInput = _currentInput.substring(0, _currentInput.length - 1);
-        _updateFeedback();
+        _todayReadings = readings;
       });
     }
   }
 
   void _updateFeedback() {
-    if (_currentInput.isEmpty) {
-      _feedbackMessage = "Enter value";
-      _feedbackColor = Colors.grey;
+    String text = _controller.text;
+    if (text.isEmpty) {
+      setState(() {
+        _feedbackMessage = "Enter value";
+        _feedbackColor = Colors.grey;
+      });
       return;
     }
 
-    int? value = int.tryParse(_currentInput);
+    double? value = double.tryParse(text);
     if (value == null) return;
 
-    if (value < 70) {
-      _feedbackMessage = "Low 🍬";
-      _feedbackColor = AppColors.statusLow;
-    } else if (value <= 140) {
-      _feedbackMessage = "In range ✅";
-      _feedbackColor = AppColors.statusNormal;
-    } else if (value <= 180) {
-      _feedbackMessage = "Slightly high ⚠️";
-      _feedbackColor = AppColors.statusHigh;
+    // mmol/L Ranges
+    String newMessage;
+    Color newColor;
+
+    if (value < 4.0) {
+      newMessage = "Low 🍬";
+      newColor = AppColors.statusLow;
+    } else if (value <= 7.8) {
+      newMessage = "In range ✅";
+      newColor = AppColors.statusNormal;
+    } else if (value <= 10.0) {
+      newMessage = "Slightly high ⚠️";
+      newColor = AppColors.statusHigh;
     } else {
-      _feedbackMessage = "High 🚨";
-      _feedbackColor = AppColors.statusVeryHigh;
+      newMessage = "High 🚨";
+      newColor = AppColors.statusVeryHigh;
     }
+
+    setState(() {
+      _feedbackMessage = newMessage;
+      _feedbackColor = newColor;
+    });
   }
 
   Future<void> _onSave() async {
-    if (_currentInput.isEmpty) return;
-    int? value = int.tryParse(_currentInput);
+    if (_controller.text.isEmpty) return;
+    double? value = double.tryParse(_controller.text);
     if (value != null) {
       await _repository.saveReading(value);
+      _loadTodayReadings(); // Refresh list immediately
       widget.onSave();
-      setState(() {
-        _currentInput = "";
-        _updateFeedback();
-      });
+      
+      // Clear input and hide keyboard
+      _controller.clear();
+      _focusNode.unfocus();
+      
       if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Glucose logged successfully!')),
@@ -80,188 +105,220 @@ class _LogPageState extends State<LogPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 使用 LayoutBuilder 来根据屏幕可用空间动态调整布局
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 判断屏幕高度是否较小（比如小于 600px），如果小则使用更紧凑的布局或 ScrollView
-        bool isSmallScreen = constraints.maxHeight < 600;
-
-        return SingleChildScrollView( // 添加 ScrollView 防止溢出
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: IntrinsicHeight( // 确保内容可以自然撑开，如果不足则撑满
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: isSmallScreen ? 10 : 0), // 顶部安全空间
-                    Text(
-                      'Enter Glucose Level',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: AppColors.text,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 10 : 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: _feedbackColor, width: 3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            _currentInput.isEmpty ? "--" : _currentInput,
-                            style: const TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.bold,
+        return Column(
+          children: [
+            // Top Section: Input (Less flex to save space for list)
+            Expanded(
+              flex: 4, 
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Enter Glucose Level',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: AppColors.text,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          const Text(
-                            "mg/dL",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 8 : 16),
-                    Text(
-                      _feedbackMessage,
+                      const SizedBox(height: 20),
+                      // Input Field with System Keyboard
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: _feedbackColor, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IntrinsicWidth(
+                              child: TextField(
+                                controller: _controller,
+                                focusNode: _focusNode,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.text,
+                                ),
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "--",
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 16),
+                              child: Text(
+                                "mmol/L",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _feedbackMessage,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: _feedbackColor,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _onSave,
+                          child: const Text("Save Reading"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Bottom Section: Today Entries (More flex)
+            Expanded(
+              flex: 6,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                     BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, -5),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Today's Entries",
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: _feedbackColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
                       ),
                     ),
-                    // 如果屏幕高度充足，用 Spacer，否则用固定间距
-                    if (!isSmallScreen) const Spacer() else const SizedBox(height: 20),
-                    _buildKeypad(isSmallScreen),
-                    SizedBox(height: isSmallScreen ? 10 : 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _currentInput.isNotEmpty ? _onSave : null,
-                        child: const Text("Save Reading"),
-                      ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: _todayReadings.isEmpty 
+                        ? const Center(child: Text("No readings today", style: TextStyle(color: Colors.grey)))
+                        : ListView.separated(
+                            itemCount: _todayReadings.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              final reading = _todayReadings[_todayReadings.length - 1 - index];
+                              return _buildEntryRow(reading);
+                            },
+                          ),
                     ),
-                    SizedBox(height: isSmallScreen ? 10 : 0), // 底部安全空间
                   ],
                 ),
               ),
             ),
-          ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildKeypad(bool isSmallScreen) {
-    // 如果屏幕小，减小按键尺寸和间距
-    double keySize = isSmallScreen ? 60 : 80;
-    double spacing = isSmallScreen ? 10 : 16;
-    double textSize = isSmallScreen ? 24 : 32;
+  Widget _buildEntryRow(GlucoseReading reading) {
+    String statusText;
+    Color statusColor;
+    
+    if (reading.value < 4.0) {
+      statusText = "Low";
+      statusColor = AppColors.statusLow;
+    } else if (reading.value <= 7.8) {
+      statusText = "Normal";
+      statusColor = AppColors.statusNormal;
+    } else if (reading.value <= 10.0) {
+      statusText = "High";
+      statusColor = AppColors.statusHigh;
+    } else {
+      statusText = "High";
+      statusColor = AppColors.statusVeryHigh;
+    }
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildKey("1", keySize, textSize),
-            _buildKey("2", keySize, textSize),
-            _buildKey("3", keySize, textSize),
-          ],
-        ),
-        SizedBox(height: spacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildKey("4", keySize, textSize),
-            _buildKey("5", keySize, textSize),
-            _buildKey("6", keySize, textSize),
-          ],
-        ),
-        SizedBox(height: spacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildKey("7", keySize, textSize),
-            _buildKey("8", keySize, textSize),
-            _buildKey("9", keySize, textSize),
-          ],
-        ),
-        SizedBox(height: spacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            SizedBox(width: keySize), // Spacer for alignment
-            _buildKey("0", keySize, textSize),
-            _buildBackspaceKey(keySize),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKey(String label, double size, double fontSize) {
-    return InkWell(
-      onTap: () => _onDigitPress(label),
-      borderRadius: BorderRadius.circular(size / 2),
-      child: Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
       ),
-    );
-  }
-
-  Widget _buildBackspaceKey(double size) {
-    return InkWell(
-      onTap: _onBackspace,
-      borderRadius: BorderRadius.circular(size / 2),
-      child: Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.backspace_outlined,
-          color: AppColors.text,
-          size: size * 0.4, // icon size relative to button size
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Text(
+                "${reading.value.toStringAsFixed(1)} mmol/L",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                DateFormat('HH:mm').format(reading.timestamp),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              statusText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

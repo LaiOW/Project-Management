@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GlucoseReading {
   final DateTime timestamp;
-  final int value; // mg/dL
+  final double value; // mmol/L
 
   GlucoseReading({required this.timestamp, required this.value});
 
@@ -15,7 +15,7 @@ class GlucoseReading {
   factory GlucoseReading.fromJson(Map<String, dynamic> json) {
     return GlucoseReading(
       timestamp: DateTime.parse(json['timestamp']),
-      value: json['value'],
+      value: (json['value'] is int) ? (json['value'] as int).toDouble() : json['value'],
     );
   }
 }
@@ -23,7 +23,7 @@ class GlucoseReading {
 class GlucoseRepository {
   static const String _key = 'glucose_readings';
 
-  Future<void> saveReading(int value) async {
+  Future<void> saveReading(double value) async {
     final prefs = await SharedPreferences.getInstance();
     final readings = await getReadings();
     readings.add(GlucoseReading(timestamp: DateTime.now(), value: value));
@@ -52,5 +52,13 @@ class GlucoseRepository {
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
     
     return allReadings.where((r) => r.timestamp.isAfter(sevenDaysAgo)).toList();
+  }
+
+  Future<List<GlucoseReading>> getReadingsForToday() async {
+    final allReadings = await getReadings();
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    
+    return allReadings.where((r) => r.timestamp.isAfter(startOfDay)).toList();
   }
 }

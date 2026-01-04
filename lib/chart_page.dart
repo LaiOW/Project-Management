@@ -91,19 +91,22 @@ class _ChartPageState extends State<ChartPage> {
   }
 
   LineChartData _buildChartData() {
-    // Determine min and max Y for better scaling
     double minY = 0;
-    double maxY = 300;
+    double maxY = 20.0; // Adjusted for mmol/L
     if (_readings.isNotEmpty) {
-      minY = (_readings.map((e) => e.value).reduce((curr, next) => curr < next ? curr : next).toDouble() - 20).clamp(0, double.infinity);
-      maxY = (_readings.map((e) => e.value).reduce((curr, next) => curr > next ? curr : next).toDouble() + 20);
+      // Ensure we are working with doubles. value is already double in GlucoseReading.
+      double minReading = _readings.map((e) => e.value).reduce((curr, next) => curr < next ? curr : next);
+      double maxReading = _readings.map((e) => e.value).reduce((curr, next) => curr > next ? curr : next);
+      
+      minY = (minReading - 2).clamp(0.0, double.infinity);
+      maxY = (maxReading + 2);
     }
 
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
-        horizontalInterval: 50,
+        horizontalInterval: 2.0, // Interval for mmol/L
         getDrawingHorizontalLine: (value) {
           return FlLine(
             color: Colors.grey.withOpacity(0.1),
@@ -119,22 +122,10 @@ class _ChartPageState extends State<ChartPage> {
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 30,
-            interval: 1, // Show a title roughly every day? Hard with timestamp points
+            interval: 1, 
             getTitlesWidget: (value, meta) {
-              // We need to map index to date or something similar if using index as X
-              // Here, let's use the index in the sorted list as X for simplicity in this "Simple Trend Graph"
-              // A more advanced graph would use time on X axis.
-              // For a "Simple Trend Graph", showing the last N points is often acceptable, or mapping days.
-              
-              // Let's try to show day names if we have few points, or nothing if too crowded.
-              // Since X is index here (see lineBarsData below), value is index.
               int index = value.toInt();
               if (index >= 0 && index < _readings.length) {
-                // Show date if it's the first reading of that day?
-                // Or just show M/T/W for the last 7 readings?
-                // Given "7-Day Trend", let's format the date.
-                
-                // To avoid crowding, show only start and end, or every 2nd?
                 if (index == 0 || index == _readings.length - 1 || index % (_readings.length ~/ 5 + 1) == 0) {
                    return SideTitleWidget(
                     axisSide: meta.axisSide,
@@ -152,10 +143,10 @@ class _ChartPageState extends State<ChartPage> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: 50,
+            interval: 2.0, // Interval for mmol/L
             getTitlesWidget: (value, meta) {
               return Text(
-                value.toInt().toString(),
+                value.toStringAsFixed(0),
                 style: const TextStyle(fontSize: 10, color: Colors.grey),
                 textAlign: TextAlign.left,
               );
@@ -172,7 +163,8 @@ class _ChartPageState extends State<ChartPage> {
       lineBarsData: [
         LineChartBarData(
           spots: _readings.asMap().entries.map((e) {
-            return FlSpot(e.key.toDouble(), e.value.value.toDouble());
+            // FIX: e.value is GlucoseReading, so we need e.value.value to get the double
+            return FlSpot(e.key.toDouble(), e.value.value);
           }).toList(),
           isCurved: true,
           color: AppColors.text, // Graph line color
@@ -181,12 +173,12 @@ class _ChartPageState extends State<ChartPage> {
           dotData: FlDotData(
             show: true,
             getDotPainter: (spot, percent, barData, index) {
-              // Color segments logic for dots
               double val = spot.y;
               Color dotColor = AppColors.statusNormal;
-              if (val < 70) dotColor = AppColors.statusLow;
-              else if (val > 180) dotColor = AppColors.statusHigh; // Orange/Red for high
-              else if (val > 140) dotColor = AppColors.statusHigh; 
+              // mmol/L Logic
+              if (val < 4.0) dotColor = AppColors.statusLow;
+              else if (val > 10.0) dotColor = AppColors.statusVeryHigh; 
+              else if (val > 7.8) dotColor = AppColors.statusHigh; 
               
               return FlDotCirclePainter(
                 radius: 4,
@@ -208,7 +200,7 @@ class _ChartPageState extends State<ChartPage> {
             return touchedBarSpots.map((barSpot) {
               final flSpot = barSpot;
               return LineTooltipItem(
-                '${flSpot.y.toInt()} mg/dL',
+                '${flSpot.y.toStringAsFixed(1)} mmol/L',
                  const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -222,13 +214,11 @@ class _ChartPageState extends State<ChartPage> {
   }
 
   Widget _buildInsightBox() {
-    // Mock insight generation
-    // In a real app, this would be AI-generated based on trends.
-    String insight = "You're doing great! Readings are mostly in range.";
+    String insight = "Readings are mostly in range.";
     String suggestion = "Keep up the good work!";
     
-    // Simple logic for demo
-    int highs = _readings.where((r) => r.value > 140).length;
+    // Simple logic for demo (using mmol/L thresholds)
+    int highs = _readings.where((r) => r.value > 7.8).length;
     if (highs > _readings.length / 3) {
       insight = "You tend to spike in the evenings.";
       suggestion = "Try a lighter dinner or a walk after eating.";
