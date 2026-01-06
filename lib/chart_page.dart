@@ -104,8 +104,9 @@ class _ChartPageState extends State<ChartPage> {
                   headers: ["Date & Time", "Level (mmol/L)", "Status"],
                   data: _filteredReadings.map((r) {
                     String status = "Normal";
-                    if (r.value < 4.0) status = "Low";
-                    else if (r.value > 10.0) status = "Very High";
+                    if (r.value < 4.0) {
+                      status = "Low";
+                    } else if (r.value > 10.0) status = "Very High";
                     else if (r.value > 7.8) status = "High";
                     
                     return [
@@ -423,8 +424,9 @@ class _ChartPageState extends State<ChartPage> {
               int total = _filteredReadings.length;
               bool showLabel = false;
               
-              if (total <= 7) showLabel = true; // Show all for small sets
-              else if (index == 0 || index == total - 1) showLabel = true; // Always show start/end
+              if (total <= 7) {
+                showLabel = true; // Show all for small sets
+              } else if (index == 0 || index == total - 1) showLabel = true; // Always show start/end
               else if (index % (total ~/ 5 + 1) == 0) showLabel = true; // Distribute others
               
               if (showLabel) {
@@ -512,8 +514,9 @@ class _ChartPageState extends State<ChartPage> {
             getDotPainter: (spot, percent, barData, index) {
               double val = spot.y;
               Color dotColor = AppColors.statusNormal;
-              if (val < 4.0) dotColor = AppColors.statusLow;
-              else if (val > 10.0) dotColor = AppColors.statusVeryHigh;
+              if (val < 4.0) {
+                dotColor = AppColors.statusLow;
+              } else if (val > 10.0) dotColor = AppColors.statusVeryHigh;
               else if (val > 7.8) dotColor = AppColors.statusHigh;
               
               return FlDotCirclePainter(

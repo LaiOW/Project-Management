@@ -609,8 +609,9 @@ class _MealTabState extends State<_MealTab> {
 
   Widget _buildMealEntryRow(MealEntry entry) {
     Color intensityColor;
-    if (entry.intensity == "Low") intensityColor = AppColors.statusNormal;
-    else if (entry.intensity == "Medium") intensityColor = AppColors.statusHigh;
+    if (entry.intensity == "Low") {
+      intensityColor = AppColors.statusNormal;
+    } else if (entry.intensity == "Medium") intensityColor = AppColors.statusHigh;
     else intensityColor = AppColors.statusVeryHigh;
 
     return Container(
@@ -1055,7 +1056,7 @@ class _MedicationTabState extends State<_MedicationTab> {
                   scale: 0.8,
                   child: Switch(
                     value: entry.isEnabled,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) => _onToggle(entry.id, val),
                   ),
                 ),
