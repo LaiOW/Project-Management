@@ -245,7 +245,11 @@ class _ChartPageState extends State<ChartPage> {
           ),
           const SizedBox(height: 24),
 
-          // 4. Functional Extensions (PDF Buttons)
+          // 4. AI Insights Section
+          _buildAIInsights(),
+          const SizedBox(height: 24),
+
+          // 5. Functional Extensions (PDF Buttons)
           Row(
             children: [
               Expanded(
@@ -533,6 +537,142 @@ class _ChartPageState extends State<ChartPage> {
           ),
         ),
       ],
+    );
+  }
+  
+  Widget _buildAIInsights() {
+    // Placeholder AI insights - no backend needed
+    List<Map<String, dynamic>> insights = [
+      {
+        'icon': Icons.trending_up,
+        'color': Color(0xFF4CAF50),
+        'text': 'Your glucose levels are most stable in the morning. Great job!',
+      },
+      {
+        'icon': Icons.lightbulb_outline,
+        'color': Color(0xFFFFA726),
+        'text': 'You tend to spike on Monday mornings. Try a glass of water before breakfast.',
+      },
+      {
+        'icon': Icons.favorite,
+        'color': Color(0xFFE91E63),
+        'text': '15-minute walks after meals have helped keep your levels steady.',
+      },
+    ];
+    
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFE3F2FD),
+            Color(0xFFF3E5F5),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'AI Insights',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Insights list
+          ...insights.map((insight) => Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: (insight['color'] as Color).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    insight['icon'] as IconData,
+                    color: insight['color'] as Color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    insight['text'] as String,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.text,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )).toList(),
+          
+          const SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Based on your last 7 days of activity',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.text.withOpacity(0.7),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

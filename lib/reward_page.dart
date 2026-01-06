@@ -56,10 +56,6 @@ class _RewardPageState extends State<RewardPage> {
                 _buildDailyQuestSection(),
                 const SizedBox(height: 24),
                 
-                // AI Insights Section
-                _buildAIInsights(),
-                const SizedBox(height: 24),
-                
                 // Badges Section
                 _buildBadgesSection(),
                 const SizedBox(height: 24),

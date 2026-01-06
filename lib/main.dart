@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'reward_page.dart';
+import 'chart_page.dart';
 
 // Therapeia Blue Color Palette
 class TherapediaColors {
@@ -1606,7 +1607,7 @@ class _DashboardState extends State<Dashboard> {
     // Build pages lazily to include MyHomePage as Home tab
     final pages = <Widget>[
       const MyHomePage(title: 'Home'),
-      const Center(child: Text('Chart Page - content placeholder')),
+      const ChartPage(),
       const LogPage(),
       const RewardPage(),
       const SettingsPage(),
