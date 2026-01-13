@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'reward_page.dart';
-import 'chart_page.dart';
+import 'dart:math' as math;
 
 // Therapeia Blue Color Palette
 class TherapediaColors {
@@ -43,7 +42,9 @@ class MyApp extends StatelessWidget {
             backgroundColor: TherapediaColors.primaryButton,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             textStyle: const TextStyle(
               fontSize: 16,
               fontFamily: 'Inter',
@@ -134,14 +135,14 @@ class LifeQuestLogoPainter extends CustomPainter {
 
     // Shield fill with gradient
     final shieldPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          TherapediaColors.primaryButton,
-          TherapediaColors.accent40,
-        ],
-      ).createShader(Rect.fromLTWH(shieldLeft, shieldTop, shieldWidth, shieldHeight))
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [TherapediaColors.primaryButton, TherapediaColors.accent40],
+          ).createShader(
+            Rect.fromLTWH(shieldLeft, shieldTop, shieldWidth, shieldHeight),
+          )
       ..style = PaintingStyle.fill;
     canvas.drawPath(shieldPath, shieldPaint);
 
@@ -190,7 +191,7 @@ class LifeQuestLogoPainter extends CustomPainter {
 
     // Medical symbol (circle and lines) inside water drop
     final symbolCenter = Offset(dropCenter.dx, dropCenter.dy + 2);
-    
+
     // Vertical line
     final linePaint = Paint()
       ..color = TherapediaColors.primaryButton
@@ -292,19 +293,18 @@ class SplashScreen extends StatelessWidget {
                     SizedBox(
                       width: 180,
                       height: 180,
-                      child: CustomPaint(
-                        painter: LifeQuestLogoPainter(),
-                      ),
+                      child: CustomPaint(painter: LifeQuestLogoPainter()),
                     ),
                     const SizedBox(height: 32),
                     // App Name
                     Text(
                       'LifeQuest',
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontSize: 48,
-                        color: TherapediaColors.mainText,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(
+                            fontSize: 48,
+                            color: TherapediaColors.mainText,
+                            fontWeight: FontWeight.w800,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -363,7 +363,11 @@ class LogEntry {
   final String details; // value or carb info
   final DateTime timestamp;
 
-  LogEntry({required this.type, required this.details, required this.timestamp});
+  LogEntry({
+    required this.type,
+    required this.details,
+    required this.timestamp,
+  });
 }
 
 class LogStorage {
@@ -376,9 +380,13 @@ class LogStorage {
   static List<LogEntry> getEntries() => List.unmodifiable(_entries);
 
   static List<LogEntry> getEntriesForDay(DateTime day) {
-    return _entries.where((e) {
-      return e.timestamp.year == day.year && e.timestamp.month == day.month && e.timestamp.day == day.day;
-    }).toList(growable: false);
+    return _entries
+        .where((e) {
+          return e.timestamp.year == day.year &&
+              e.timestamp.month == day.month &&
+              e.timestamp.day == day.day;
+        })
+        .toList(growable: false);
   }
 }
 
@@ -427,13 +435,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         page = _OnboardTarget(onContinue: _next, onSkip: _skipToLogin);
         break;
       default:
-        page = _EmergencyContact(onContinue: _skipToLogin, onSkip: _skipToLogin);
+        page = _EmergencyContact(
+          onContinue: _skipToLogin,
+          onSkip: _skipToLogin,
+        );
     }
 
-    return Scaffold(
-      backgroundColor: TherapediaColors.background,
-      body: page,
-    );
+    return Scaffold(backgroundColor: TherapediaColors.background, body: page);
   }
 }
 
@@ -454,14 +462,33 @@ class _WelcomeOnboard extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.health_and_safety, size: 72, color: TherapediaColors.primaryButton),
+                  const Icon(
+                    Icons.health_and_safety,
+                    size: 72,
+                    color: TherapediaColors.primaryButton,
+                  ),
                   const SizedBox(height: 24),
-                  Text('Welcome to', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 20)),
+                  Text(
+                    'Welcome to',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(fontSize: 20),
+                  ),
                   const SizedBox(height: 8),
-                  Text('LifeQuest - Quest', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: TherapediaColors.primaryButton)),
+                  Text(
+                    'LifeQuest - Quest',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: TherapediaColors.primaryButton,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('for Diabetes', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: TherapediaColors.mainText)),
-                ]
+                  Text(
+                    'for Diabetes',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: TherapediaColors.mainText,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -471,10 +498,13 @@ class _WelcomeOnboard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: onContinue,
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Get Started')),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Get Started'),
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -502,14 +532,27 @@ class _OnboardQuestionState extends State<_OnboardQuestion> {
         children: [
           Row(
             children: [
-              IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back)),
-              Expanded(child: LinearProgressIndicator(value: 0.25, color: TherapediaColors.primaryButton)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: 0.25,
+                  color: TherapediaColors.primaryButton,
+                ),
+              ),
               TextButton(onPressed: widget.onSkip, child: const Text('Skip')),
             ],
           ),
           Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Text('What is your diabetes\ntype?', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 28)),
+            child: Text(
+              'What is your diabetes\ntype?',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineLarge?.copyWith(fontSize: 28),
+            ),
           ),
           Expanded(
             child: Padding(
@@ -519,33 +562,50 @@ class _OnboardQuestionState extends State<_OnboardQuestion> {
                 childAspectRatio: 1.3,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                children: List.generate(4, (i) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedType = i;
-                      UserSetupData.diabetesType = ['Type 1','Type 2','Gestational','Other'][i];
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: _selectedType == i ? TherapediaColors.primaryButton : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _selectedType == i ? TherapediaColors.primaryButton : Colors.grey.shade300,
-                        width: 2,
+                children: List.generate(
+                  4,
+                  (i) => GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedType = i;
+                        UserSetupData.diabetesType = [
+                          'Type 1',
+                          'Type 2',
+                          'Gestational',
+                          'Other',
+                        ][i];
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _selectedType == i
+                            ? TherapediaColors.primaryButton
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _selectedType == i
+                              ? TherapediaColors.primaryButton
+                              : Colors.grey.shade300,
+                          width: 2,
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        ['Type 1','Type 2','Gestational','Other'][i],
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: _selectedType == i ? Colors.white : TherapediaColors.mainText,
-                          fontWeight: _selectedType == i ? FontWeight.w600 : FontWeight.w400,
+                      child: Center(
+                        child: Text(
+                          ['Type 1', 'Type 2', 'Gestational', 'Other'][i],
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: _selectedType == i
+                                    ? Colors.white
+                                    : TherapediaColors.mainText,
+                                fontWeight: _selectedType == i
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
                         ),
                       ),
                     ),
                   ),
-                )),
+                ),
               ),
             ),
           ),
@@ -555,7 +615,10 @@ class _OnboardQuestionState extends State<_OnboardQuestion> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: widget.onContinue,
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Continue')),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Continue'),
+                ),
               ),
             ),
           ),
@@ -576,16 +639,30 @@ class _OnboardMedication extends StatefulWidget {
 }
 
 class _OnboardMedicationState extends State<_OnboardMedication> {
+  // ---------------------------------------------------------
+  // EDIT HERE: Updated list (Sorted A-Z)
+  // ---------------------------------------------------------
   final List<String> _options = const [
-    'Metformin',
+    'Acarbose',
+    'Canagliflozin',
+    'Dapagliflozin',
+    'DPP-4 Inhibitors',
+    'Empagliflozin',
+    'Gliclazide',
+    'Glimepiride',
+    'GLP-1 Agonists (e.g. Ozempic)',
     'Insulin',
+    'Linagliptin',
+    'Metformin',
+    'Pioglitazone',
+    'Repaglinide',
+    'Rosiglitazone',
+    'SGLT2 Inhibitors',
+    'Sitagliptin',
     'Sulfonylureas',
-    'DPP-4 inhibitors',
-    'GLP-1 agonists',
-    'SGLT2 inhibitors',
-    'Thiazolidinediones',
-    'Other',
+    'Other', // 'Other' must always remain last for the logic below
   ];
+
   late List<bool> _selected;
   final TextEditingController _otherController = TextEditingController();
 
@@ -594,12 +671,16 @@ class _OnboardMedicationState extends State<_OnboardMedication> {
     super.initState();
     _selected = List<bool>.filled(_options.length, false);
 
-    // Restore prior selections
+    // Restore prior selections from static storage
+    // We iterate through options to check if they were previously saved
     for (int i = 0; i < _options.length; i++) {
-      if (_options[i] != 'Other' && UserSetupData.medicationsSelected.contains(_options[i])) {
+      if (_options[i] != 'Other' &&
+          UserSetupData.medicationsSelected.contains(_options[i])) {
         _selected[i] = true;
       }
     }
+
+    // Check if 'Other' was used previously
     if (UserSetupData.medicationOther.isNotEmpty) {
       _selected[_options.length - 1] = true;
       _otherController.text = UserSetupData.medicationOther;
@@ -628,7 +709,9 @@ class _OnboardMedicationState extends State<_OnboardMedication> {
     }
 
     UserSetupData.medicationsSelected = meds;
-    UserSetupData.medicationOther = _selected[_options.length - 1] ? custom : '';
+    UserSetupData.medicationOther = _selected[_options.length - 1]
+        ? custom
+        : '';
   }
 
   @override
@@ -636,60 +719,167 @@ class _OnboardMedicationState extends State<_OnboardMedication> {
     return SafeArea(
       child: Column(
         children: [
+          // Navigation Header
           Row(
             children: [
-              IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back)),
-              Expanded(child: LinearProgressIndicator(value: 0.5, color: TherapediaColors.primaryButton)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: 0.5,
+                  color: TherapediaColors.primaryButton,
+                ),
+              ),
               TextButton(onPressed: widget.onSkip, child: const Text('Skip')),
             ],
           ),
+
+          // Title
           Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text('What medications do\nyou take?', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 28)),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(24),
-              itemCount: _options.length,
-              itemBuilder: (c, i) => ListTile(
-                title: Text(_options[i]),
-                trailing: Checkbox(
-                  value: _selected[i],
-                  onChanged: (val) {
-                    setState(() {
-                      _selected[i] = val ?? false;
-                      // If "Other" unchecked, clear custom text
-                      if (!_selected[i] && _options[i] == 'Other') {
-                        _otherController.clear();
-                      }
-                      _syncMedications();
-                    });
-                  },
-                ),
-                subtitle: _options[i] == 'Other' && _selected[i]
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: TextField(
-                          controller: _otherController,
-                          onChanged: (val) => _syncMedications(),
-                          decoration: const InputDecoration(
-                            hintText: 'Enter medication name',
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      )
-                    : null,
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'What medications do\nyou take?',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineLarge?.copyWith(fontSize: 28),
               ),
             ),
           ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Select all that apply',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              ),
+            ),
+          ),
+
+          // Options List
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(24),
+              itemCount: _options.length,
+              separatorBuilder: (c, i) => const SizedBox(height: 12),
+              itemBuilder: (c, i) {
+                final isSelected = _selected[i];
+                final isOther = _options[i] == 'Other';
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? TherapediaColors.primaryButton.withOpacity(0.05)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? TherapediaColors.primaryButton
+                          : Colors.grey.shade300,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        title: Text(
+                          _options[i],
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? TherapediaColors.primaryButton
+                                : TherapediaColors.mainText,
+                          ),
+                        ),
+                        trailing: Checkbox(
+                          value: isSelected,
+                          activeColor: TherapediaColors.primaryButton,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              _selected[i] = val ?? false;
+                              // If "Other" unchecked, clear custom text
+                              if (!_selected[i] && isOther) {
+                                _otherController.clear();
+                              }
+                              _syncMedications();
+                            });
+                          },
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selected[i] = !isSelected;
+                            if (!_selected[i] && isOther) {
+                              _otherController.clear();
+                            }
+                            _syncMedications();
+                          });
+                        },
+                      ),
+                      // Expandable Text Field for "Other"
+                      if (isOther && isSelected)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: TextField(
+                            controller: _otherController,
+                            onChanged: (val) => _syncMedications(),
+                            decoration: InputDecoration(
+                              hintText: 'Type medication name...',
+                              fillColor: Colors.white,
+                              filled: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: TherapediaColors.primaryButton,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Continue Button
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: widget.onContinue,
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Continue')),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Continue'),
+                ),
               ),
             ),
           ),
@@ -699,7 +889,7 @@ class _OnboardMedicationState extends State<_OnboardMedication> {
   }
 }
 
-// Glucose Level Target (Screen 4)
+// Glucose Level Target (Screen 4) - Slider + Manual Entry
 class _OnboardTarget extends StatefulWidget {
   final VoidCallback onContinue;
   final VoidCallback onSkip;
@@ -710,27 +900,47 @@ class _OnboardTarget extends StatefulWidget {
 }
 
 class _OnboardTargetState extends State<_OnboardTarget> {
-  String _displayValue = '0';
+  double _currentValue = 5.5; // Default healthy target
 
   @override
   void initState() {
     super.initState();
-    _displayValue = UserSetupData.glucoseLevel.isEmpty ? '0' : UserSetupData.glucoseLevel;
+    try {
+      if (UserSetupData.glucoseLevel.isNotEmpty &&
+          UserSetupData.glucoseLevel != '0') {
+        _currentValue = double.parse(UserSetupData.glucoseLevel);
+      }
+    } catch (e) {
+      _currentValue = 5.5;
+    }
   }
 
-  void _showGlucoseDialog() {
-    final TextEditingController glucoseInput = TextEditingController(text: _displayValue);
-    
+  // Update value from Slider
+  void _updateValue(double value) {
+    setState(() {
+      _currentValue = value;
+      UserSetupData.glucoseLevel = _currentValue.toStringAsFixed(1);
+    });
+  }
+
+  // Show Dialog for Manual Entry
+  void _showManualEntryDialog() {
+    final TextEditingController controller = TextEditingController(
+      text: _currentValue.toStringAsFixed(1),
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Enter Glucose Level'),
         content: TextField(
-          controller: glucoseInput,
+          controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Enter value',
-            label: Text('mmol/L'),
+            hintText: 'e.g. 5.5',
+            suffixText: 'mmol/L',
+            border: OutlineInputBorder(),
           ),
         ),
         actions: [
@@ -738,15 +948,17 @@ class _OnboardTargetState extends State<_OnboardTarget> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
-              setState(() {
-                _displayValue = glucoseInput.text.isEmpty ? '0' : glucoseInput.text;
-                UserSetupData.glucoseLevel = _displayValue;
-              });
+              final val = double.tryParse(controller.text);
+              if (val != null) {
+                // Clamp value to reasonable limits (e.g., 0 to 30)
+                final clampedVal = val.clamp(0.0, 30.0);
+                _updateValue(clampedVal);
+              }
               Navigator.pop(context);
             },
-            child: const Text('Confirm'),
+            child: const Text('Set'),
           ),
         ],
       ),
@@ -758,60 +970,184 @@ class _OnboardTargetState extends State<_OnboardTarget> {
     return SafeArea(
       child: Column(
         children: [
+          // Navigation Header
           Row(
             children: [
-              IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back)),
-              Expanded(child: LinearProgressIndicator(value: 0.75, color: TherapediaColors.primaryButton)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: 0.75,
+                  color: TherapediaColors.primaryButton,
+                ),
+              ),
               TextButton(onPressed: widget.onSkip, child: const Text('Skip')),
             ],
           ),
+
+          // Title
           Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Text('What is your ideal\nglucose level?', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 28)),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'What is your ideal\nglucose level?',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineLarge?.copyWith(fontSize: 28),
+              ),
+            ),
           ),
+
           Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: _showGlucoseDialog,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Clickable Display Area
+                GestureDetector(
+                  onTap: _showManualEntryDialog,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent, // Hitbox for tap
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.transparent),
+                    ),
                     child: Column(
                       children: [
                         Text(
-                          _displayValue,
-                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 64),
+                          _currentValue.toStringAsFixed(1),
+                          style: Theme.of(context).textTheme.headlineLarge
+                              ?.copyWith(
+                                fontSize: 80,
+                                color: TherapediaColors.primaryButton,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
-                        const SizedBox(height: 16),
-                        const Text('mmol/L', style: TextStyle(fontSize: 18)),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: TherapediaColors.primaryButton.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                        const Text(
+                          'mmol/L',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
                           ),
-                          child: Text(
-                            'Tap to change',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: TherapediaColors.primaryButton,
+                        ),
+                        const SizedBox(height: 8),
+                        // Small indicator that it's editable
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: TherapediaColors.primaryButton.withOpacity(
+                              0.1,
                             ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                Icons.edit,
+                                size: 14,
+                                color: TherapediaColors.primaryButton,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                "Tap to type",
+                                style: TextStyle(
+                                  color: TherapediaColors.primaryButton,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // Slider Control
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: TherapediaColors.primaryButton,
+                          inactiveTrackColor: TherapediaColors.primaryButton
+                              .withOpacity(0.2),
+                          thumbColor: TherapediaColors.primaryButton,
+                          overlayColor: TherapediaColors.primaryButton
+                              .withOpacity(0.1),
+                          trackHeight: 8.0,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 12.0,
+                          ),
+                          overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 24.0,
+                          ),
+                        ),
+                        child: Slider(
+                          value: _currentValue.clamp(
+                            3.0,
+                            15.0,
+                          ), // Ensure slider doesn't break if manual entry is high
+                          min: 3.0,
+                          max: 15.0,
+                          divisions: 120,
+                          label: _currentValue.toStringAsFixed(1),
+                          onChanged: _updateValue,
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text('3.0', style: TextStyle(color: Colors.grey)),
+                            Text('15.0', style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Manual Entry Button (Alternative to tapping number)
+                TextButton.icon(
+                  onPressed: _showManualEntryDialog,
+                  icon: const Icon(Icons.keyboard_alt_outlined),
+                  label: const Text('Enter Manually'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: TherapediaColors.accent40,
+                  ),
+                ),
+              ],
             ),
           ),
+
+          // Continue Button
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: widget.onContinue,
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Continue')),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Continue'),
+                ),
               ),
             ),
           ),
@@ -863,68 +1199,106 @@ class _EmergencyContactState extends State<_EmergencyContact> {
         children: [
           Row(
             children: [
-              IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back)),
-              Expanded(child: LinearProgressIndicator(value: 1.0, color: TherapediaColors.primaryButton)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: 1.0,
+                  color: TherapediaColors.primaryButton,
+                ),
+              ),
               TextButton(onPressed: widget.onSkip, child: const Text('Skip')),
             ],
           ),
           Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Text('Emergency Contact\nSetup', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 28)),
+            child: Text(
+              'Emergency Contact\nSetup',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineLarge?.copyWith(fontSize: 28),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Name', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(
+                  'Name',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _name,
                   onChanged: (val) => UserSetupData.emergencyContactName = val,
                   onTap: () {
                     if (!_nameTapped) {
-                      _name.selection = TextSelection(baseOffset: 0, extentOffset: _name.text.length);
+                      _name.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: _name.text.length,
+                      );
                       _nameTapped = true;
                     }
                   },
                   decoration: InputDecoration(
                     hintText: 'steve',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Relationship', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(
+                  'Relationship',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _relation,
-                  onChanged: (val) => UserSetupData.emergencyContactRelation = val,
+                  onChanged: (val) =>
+                      UserSetupData.emergencyContactRelation = val,
                   onTap: () {
                     if (!_relationTapped) {
-                      _relation.selection = TextSelection(baseOffset: 0, extentOffset: _relation.text.length);
+                      _relation.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: _relation.text.length,
+                      );
                       _relationTapped = true;
                     }
                   },
                   decoration: InputDecoration(
                     hintText: 'dad',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Phone number', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(
+                  'Phone number',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _phone,
                   onChanged: (val) => UserSetupData.emergencyContactPhone = val,
                   onTap: () {
                     if (!_phoneTapped) {
-                      _phone.selection = TextSelection(baseOffset: 0, extentOffset: _phone.text.length);
+                      _phone.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: _phone.text.length,
+                      );
                       _phoneTapped = true;
                     }
                   },
                   decoration: InputDecoration(
                     hintText: '011-12345678',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   keyboardType: TextInputType.phone,
                 ),
@@ -940,7 +1314,10 @@ class _EmergencyContactState extends State<_EmergencyContact> {
                 onPressed: () {
                   widget.onContinue();
                 },
-                child: const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Sign In')),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Sign In'),
+                ),
               ),
             ),
           ),
@@ -1009,16 +1386,16 @@ class _MedicalDisclaimerScreenState extends State<MedicalDisclaimerScreen> {
                 Text(
                   'Privacy & Safety Check',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: TherapediaColors.mainText,
-                      ),
+                    color: TherapediaColors.mainText,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Medical Disclaimer',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: TherapediaColors.accent40,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: TherapediaColors.accent40,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -1047,9 +1424,7 @@ class _MedicalDisclaimerScreenState extends State<MedicalDisclaimerScreen> {
                           Text(
                             'Important Notice',
                             style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
@@ -1075,9 +1450,9 @@ class _MedicalDisclaimerScreenState extends State<MedicalDisclaimerScreen> {
                           '🚨 In emergencies, contact emergency services immediately.',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                            color: Colors.red.shade700,
-                            fontWeight: FontWeight.w500,
-                          ),
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ),
                     ],
@@ -1229,7 +1604,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
         });
 
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Dashboard(initialIndex: 0)),
+          MaterialPageRoute(
+            builder: (context) => const Dashboard(initialIndex: 0),
+          ),
         );
       }
     });
@@ -1284,7 +1661,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                    _isLoginMode
+                  _isLoginMode
                       ? 'Login to your LifeQuest account'
                       : 'Join us and start your wellness journey',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -1342,9 +1719,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 // Email Field
                 Text(
                   'Email Address',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -1386,9 +1763,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 // Password Field
                 Text(
                   'Password',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -1445,14 +1822,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                     onPressed: _isLoading ? null : _handleAuth,
                     child: _isLoading
                         ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 2,
-                      ),
-                    )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                              strokeWidth: 2,
+                            ),
+                          )
                         : Text(_isLoginMode ? 'Login' : 'Sign Up'),
                   ),
                 ),
@@ -1475,9 +1853,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                             text: _isLoginMode ? 'Sign Up' : 'Login',
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
-                              color: TherapediaColors.primaryButton,
-                              fontWeight: FontWeight.w700,
-                            ),
+                                  color: TherapediaColors.primaryButton,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ],
                       ),
@@ -1517,10 +1895,7 @@ class HistoryPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: TherapediaColors.background,
-      appBar: AppBar(
-        title: const Text('History'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('History'), elevation: 0),
       body: entries.isEmpty
           ? Center(
               child: Text(
@@ -1540,7 +1915,10 @@ class HistoryPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 8,
+                      ),
                       child: Text(
                         dateStr,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -1549,21 +1927,25 @@ class HistoryPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    ...dayEntries.map((entry) => Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: Icon(
-                              entry.type == 'Glucose' ? Icons.opacity : Icons.restaurant,
-                              color: TherapediaColors.primaryButton,
-                            ),
-                            title: Text(entry.type),
-                            subtitle: Text(entry.details),
-                            trailing: Text(
-                              _formatTime(entry.timestamp),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                    ...dayEntries.map(
+                      (entry) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: Icon(
+                            entry.type == 'Glucose'
+                                ? Icons.opacity
+                                : Icons.restaurant,
+                            color: TherapediaColors.primaryButton,
                           ),
-                        )),
+                          title: Text(entry.type),
+                          subtitle: Text(entry.details),
+                          trailing: Text(
+                            _formatTime(entry.timestamp),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 8),
                   ],
                 );
@@ -1573,6 +1955,88 @@ class HistoryPage extends StatelessWidget {
   }
 }
 
+// Custom Painter for the habit rings
+class RingPainter extends CustomPainter {
+  final Color color;
+  final double progress; // 0.0 to 1.0
+
+  RingPainter({required this.color, required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    const strokeWidth = 8.0;
+
+    // Background ring
+    final bgPaint = Paint()
+      ..color = color.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
+
+    // Progress arc
+    final progressPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Start from top ( -pi/2 )
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant RingPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
+
+// A simple painter for the graph placeholder
+class _GraphPlaceholderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.redAccent.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(0, size.height * 0.7);
+    path.quadraticBezierTo(
+      size.width * 0.2,
+      size.height * 0.9,
+      size.width * 0.4,
+      size.height * 0.6,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.6,
+      size.height * 0.3,
+      size.width * 0.8,
+      size.height * 0.5,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.9,
+      size.height * 0.6,
+      size.width,
+      size.height * 0.4,
+    );
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -1580,6 +2044,240 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: TherapediaColors.background,
+      appBar: AppBar(
+        title: Text(widget.title),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: TherapediaColors.mainText,
+        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+        actions: [
+          IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildGlucoseCard(),
+            const SizedBox(height: 24),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left Column: Habit Rings
+                Expanded(flex: 2, child: _buildHabitRings()),
+                const SizedBox(width: 20),
+                // Right Column: Reminders and Streak
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    children: [
+                      _buildNextReminderCard(),
+                      const SizedBox(height: 20),
+                      _buildStreakCard(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      // Keeping the original FAB since it's in the Dashboard structure
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Action to add a new entry
+        },
+        tooltip: 'Add',
+        backgroundColor: TherapediaColors.primaryButton,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildGlucoseCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: TherapediaColors.mainText, // Dark blue from palette
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Daily glucose',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '6.2 mmol/l',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          // Placeholder for the graph.
+          Container(
+            width: 120,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CustomPaint(painter: _GraphPlaceholderPainter()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHabitRings() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Habit Rings',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 20),
+          _buildRing('Glucose', Icons.water_drop, Colors.redAccent, 0.7),
+          const SizedBox(height: 20),
+          _buildRing('Carb', Icons.restaurant_menu, Colors.purpleAccent, 0.5),
+          const SizedBox(height: 20),
+          _buildRing('Medicine', Icons.medication, Colors.tealAccent, 0.9),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRing(String label, IconData icon, Color color, double progress) {
+    const size = 80.0;
+    return Column(
+      children: [
+        SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(
+                size: const Size(size, size),
+                painter: RingPainter(color: color, progress: progress),
+              ),
+              Icon(icon, color: TherapediaColors.mainText, size: 28),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNextReminderCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Next Reminder',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 16),
+          _buildReminderItem('Insulin', '2 h 19 min'),
+          const SizedBox(height: 12),
+          _buildReminderItem('Atorva', '11 h 19 min'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReminderItem(String title, String time) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.redAccent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(time, style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreakCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: TherapediaColors.mainText, // Dark blue
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Streak',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              '19',
+              style: TextStyle(
+                color: Colors.redAccent.withOpacity(0.8),
+                fontSize: 64,
+                fontWeight: FontWeight.bold,
+                height: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // Dashboard with Bottom Navigation
@@ -1607,9 +2305,9 @@ class _DashboardState extends State<Dashboard> {
     // Build pages lazily to include MyHomePage as Home tab
     final pages = <Widget>[
       const MyHomePage(title: 'Home'),
-      const ChartPage(),
+      const Center(child: Text('Chart Page - content placeholder')),
       const LogPage(),
-      const RewardPage(),
+      const Center(child: Text('Reward Page - content placeholder')),
       const SettingsPage(),
     ];
 
@@ -1624,9 +2322,18 @@ class _DashboardState extends State<Dashboard> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Chart'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Log'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_events_outlined), label: 'Reward'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Log',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events_outlined),
+            label: 'Reward',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
       ),
     );
@@ -1696,17 +2403,17 @@ class SettingsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Current Diabetes Type:',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     UserSetupData.diabetesType,
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: TherapediaColors.primaryButton,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: TherapediaColors.primaryButton,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -1714,45 +2421,65 @@ class SettingsPage extends StatelessWidget {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.person_outline, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.person_outline,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Diabetes Profile',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         UserSetupData.diabetesType,
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -1770,59 +2497,88 @@ class SettingsPage extends StatelessWidget {
                                   ? const Text('No medications selected')
                                   : Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: meds
-                                          .map((m) => Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                                child: Text('• $m'),
-                                              ))
+                                          .map(
+                                            (m) => Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 4.0,
+                                                  ),
+                                              child: Text('• $m'),
+                                            ),
+                                          )
                                           .toList(),
                                     ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.medication_outlined, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.medication_outlined,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Medications',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
                                       Text(
-                                        UserSetupData.medicationsSelected.isEmpty
+                                        UserSetupData
+                                                .medicationsSelected
+                                                .isEmpty
                                             ? 'Not set'
-                                            : UserSetupData.medicationsSelected.join(', '),
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                            : UserSetupData.medicationsSelected
+                                                  .join(', '),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -1841,44 +2597,44 @@ class SettingsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Name:',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     UserSetupData.emergencyContactName,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Relation:',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     UserSetupData.emergencyContactRelation,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Phone:',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     UserSetupData.emergencyContactPhone,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),
@@ -1886,45 +2642,65 @@ class SettingsPage extends StatelessWidget {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.phone_outlined, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.phone_outlined,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Emergency Contact',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         UserSetupData.emergencyContactName,
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -1962,14 +2738,17 @@ class SettingsPage extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Review how we protect you',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Colors.grey,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
                                       'Your data privacy is important to us. We collect and use your health information securely and only for the purpose of helping you manage your diabetes.',
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
                                     ),
                                   ],
                                 ),
@@ -1978,45 +2757,65 @@ class SettingsPage extends StatelessWidget {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.verified_outlined, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.verified_outlined,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Data Privacy Policy',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         'Review how we protect you',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -2035,14 +2834,17 @@ class SettingsPage extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Important health notice',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Colors.grey,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
                                       'This app is for self-management purposes only... Not a medical diagnosis. It is not intended for treatment, cure, or prevention of any disease. Always consult qualified healthcare professionals before making health decisions.',
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
                                     ),
                                   ],
                                 ),
@@ -2051,45 +2853,65 @@ class SettingsPage extends StatelessWidget {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.description_outlined, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.description_outlined,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Medical Disclaimer',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         'Important health notice',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -2126,24 +2948,23 @@ class SettingsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Muted Time Range:',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     '10 PM - 7 AM',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: TherapediaColors.primaryButton,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: TherapediaColors.primaryButton,
+                                        ),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'You will not receive notifications during this time period.',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: Colors.grey),
                                   ),
                                 ],
                               ),
@@ -2151,45 +2972,65 @@ class SettingsPage extends StatelessWidget {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
-                                )
+                                ),
                               ],
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 6),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.notifications_outlined, color: TherapediaColors.primaryButton, size: 28),
+                                  const Icon(
+                                    Icons.notifications_outlined,
+                                    color: TherapediaColors.primaryButton,
+                                    size: 28,
+                                  ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Notifications',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       Text(
                                         'Muted 10 PM - 7 AM',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: TherapediaColors.mainText.withOpacity(0.6),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: TherapediaColors.mainText
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                         ),
@@ -2208,7 +3049,9 @@ class SettingsPage extends StatelessWidget {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Log Out'),
-                          content: const Text('Are you sure you want to log out?'),
+                          content: const Text(
+                            'Are you sure you want to log out?',
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -2218,7 +3061,9 @@ class SettingsPage extends StatelessWidget {
                               onPressed: () {
                                 Navigator.pop(context);
                                 Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginSignupScreen(),
+                                  ),
                                 );
                               },
                               child: const Text('Log Out'),
@@ -2234,10 +3079,11 @@ class SettingsPage extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Log Out',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.red.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ],
                     ),
@@ -2312,9 +3158,9 @@ class _LogPageState extends State<LogPage> {
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -2337,7 +3183,11 @@ class _LogPageState extends State<LogPage> {
                 MaterialPageRoute(builder: (context) => const HistoryPage()),
               );
             },
-            icon: const Icon(Icons.history, color: TherapediaColors.primaryButton, size: 28),
+            icon: const Icon(
+              Icons.history,
+              color: TherapediaColors.primaryButton,
+              size: 28,
+            ),
           ),
         ],
       ),
@@ -2355,7 +3205,9 @@ class _LogPageState extends State<LogPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: _isGlucose ? TherapediaColors.primaryButton : Colors.white,
+                  color: _isGlucose
+                      ? TherapediaColors.primaryButton
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white),
                   boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
@@ -2363,9 +3215,21 @@ class _LogPageState extends State<LogPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.opacity, color: _isGlucose ? Colors.white : TherapediaColors.accent40),
+                    Icon(
+                      Icons.opacity,
+                      color: _isGlucose
+                          ? Colors.white
+                          : TherapediaColors.accent40,
+                    ),
                     const SizedBox(width: 8),
-                    Text('Glucose', style: TextStyle(color: _isGlucose ? Colors.white : TherapediaColors.accent40)),
+                    Text(
+                      'Glucose',
+                      style: TextStyle(
+                        color: _isGlucose
+                            ? Colors.white
+                            : TherapediaColors.accent40,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -2378,16 +3242,30 @@ class _LogPageState extends State<LogPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: !_isGlucose ? TherapediaColors.primaryButton : Colors.white,
+                  color: !_isGlucose
+                      ? TherapediaColors.primaryButton
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.restaurant, color: !_isGlucose ? Colors.white : TherapediaColors.accent40),
+                    Icon(
+                      Icons.restaurant,
+                      color: !_isGlucose
+                          ? Colors.white
+                          : TherapediaColors.accent40,
+                    ),
                     const SizedBox(width: 8),
-                    Text('Meal Log', style: TextStyle(color: !_isGlucose ? Colors.white : TherapediaColors.accent40)),
+                    Text(
+                      'Meal Log',
+                      style: TextStyle(
+                        color: !_isGlucose
+                            ? Colors.white
+                            : TherapediaColors.accent40,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -2413,17 +3291,35 @@ class _LogPageState extends State<LogPage> {
             ),
             child: Column(
               children: [
-                Text('ENTER READING', style: Theme.of(context).textTheme.bodyMedium?.copyWith(letterSpacing: 2, color: TherapediaColors.accent40)),
+                Text(
+                  'ENTER READING',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    letterSpacing: 2,
+                    color: TherapediaColors.accent40,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _readingController,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 48, color: TherapediaColors.primaryButton),
-                  decoration: const InputDecoration(border: InputBorder.none, hintText: '000'),
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontSize: 48,
+                    color: TherapediaColors.primaryButton,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '000',
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Align(alignment: Alignment.centerRight, child: Text('mg/dL', style: Theme.of(context).textTheme.bodyMedium)),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'mg/dL',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
               ],
             ),
           ),
@@ -2433,19 +3329,28 @@ class _LogPageState extends State<LogPage> {
             child: ElevatedButton(
               onPressed: () {
                 if (_readingController.text.isNotEmpty) {
-                  LogStorage.addEntry(LogEntry(
-                    type: 'Glucose',
-                    details: '${_readingController.text} mg/dL',
-                    timestamp: DateTime.now(),
-                  ));
+                  LogStorage.addEntry(
+                    LogEntry(
+                      type: 'Glucose',
+                      details: '${_readingController.text} mg/dL',
+                      timestamp: DateTime.now(),
+                    ),
+                  );
                   _readingController.clear();
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reading saved')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Reading saved')),
+                  );
                   setState(() {});
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a reading')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a reading')),
+                  );
                 }
               },
-              child: const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text('Save Reading')),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: Text('Save Reading'),
+              ),
             ),
           ),
         ],
@@ -2467,23 +3372,39 @@ class _LogPageState extends State<LogPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                border: Border.all(color: TherapediaColors.accent40.withOpacity(0.4), width: 1.2),
+                border: Border.all(
+                  color: TherapediaColors.accent40.withOpacity(0.4),
+                  width: 1.2,
+                ),
               ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.camera_alt_outlined, color: TherapediaColors.accent40, size: 36),
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color: TherapediaColors.accent40,
+                      size: 36,
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                      _mealImagePath == null ? 'Add Meal Photo' : 'Photo Selected ✓',
+                      _mealImagePath == null
+                          ? 'Add Meal Photo'
+                          : 'Photo Selected ✓',
                       style: TextStyle(
-                        color: _mealImagePath == null ? Colors.blueAccent : Colors.green,
-                        fontWeight: _mealImagePath == null ? FontWeight.normal : FontWeight.w600,
+                        color: _mealImagePath == null
+                            ? Colors.blueAccent
+                            : Colors.green,
+                        fontWeight: _mealImagePath == null
+                            ? FontWeight.normal
+                            : FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text('optional', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    const Text(
+                      'optional',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     if (_mealImagePath != null) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -2493,7 +3414,7 @@ class _LogPageState extends State<LogPage> {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -2503,11 +3424,21 @@ class _LogPageState extends State<LogPage> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)]),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('CARB CONTENT', style: Theme.of(context).textTheme.bodyMedium?.copyWith(letterSpacing: 1.5, color: TherapediaColors.accent40)),
+                Text(
+                  'CARB CONTENT',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    letterSpacing: 1.5,
+                    color: TherapediaColors.accent40,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: List.generate(3, (i) {
@@ -2520,10 +3451,23 @@ class _LogPageState extends State<LogPage> {
                           margin: EdgeInsets.only(left: i == 0 ? 0 : 8),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: selected ? TherapediaColors.primaryButton : Colors.grey.shade100,
+                            color: selected
+                                ? TherapediaColors.primaryButton
+                                : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Center(child: Text(labels[i], style: TextStyle(color: selected ? Colors.white : TherapediaColors.mainText.withOpacity(0.7)))),
+                          child: Center(
+                            child: Text(
+                              labels[i],
+                              style: TextStyle(
+                                color: selected
+                                    ? Colors.white
+                                    : TherapediaColors.mainText.withOpacity(
+                                        0.7,
+                                      ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     );
@@ -2538,18 +3482,28 @@ class _LogPageState extends State<LogPage> {
             child: ElevatedButton(
               onPressed: () {
                 final labels = ['Low', 'Medium', 'High'];
-                LogStorage.addEntry(LogEntry(
-                  type: 'Meal',
-                  details: '${labels[_carbIndex]} Carb${_mealImagePath != null ? ' (with photo)' : ''}',
-                  timestamp: DateTime.now(),
-                ));
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Meal logged')));
+                LogStorage.addEntry(
+                  LogEntry(
+                    type: 'Meal',
+                    details:
+                        '${labels[_carbIndex]} Carb${_mealImagePath != null ? ' (with photo)' : ''}',
+                    timestamp: DateTime.now(),
+                  ),
+                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Meal logged')));
                 setState(() {
                   _mealImagePath = null; // Reset after logging
                 });
               },
-              style: ElevatedButton.styleFrom(backgroundColor: TherapediaColors.primaryButton),
-              child: const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text('Log Meal')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TherapediaColors.primaryButton,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: Text('Log Meal'),
+              ),
             ),
           ),
         ],
@@ -2582,36 +3536,45 @@ class _LogPageState extends State<LogPage> {
                         children: [
                           Text(
                             'Today\'s Entries',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                ),
                           ),
                           const SizedBox(height: 12),
-                          ...LogStorage.getEntriesForDay(DateTime.now()).map((entry) => Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: Icon(
-                                entry.type == 'Glucose' ? Icons.opacity : Icons.restaurant,
-                                color: TherapediaColors.primaryButton,
-                              ),
-                              title: Text(entry.type),
-                              subtitle: Text(entry.details),
-                              trailing: Text(
-                                '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                          ...LogStorage.getEntriesForDay(DateTime.now()).map(
+                            (entry) => Card(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: ListTile(
+                                leading: Icon(
+                                  entry.type == 'Glucose'
+                                      ? Icons.opacity
+                                      : Icons.restaurant,
+                                  color: TherapediaColors.primaryButton,
+                                ),
+                                title: Text(entry.type),
+                                subtitle: Text(entry.details),
+                                trailing: Text(
+                                  '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
                               ),
                             ),
-                          )),
-                          if (LogStorage.getEntriesForDay(DateTime.now()).isEmpty)
+                          ),
+                          if (LogStorage.getEntriesForDay(
+                            DateTime.now(),
+                          ).isEmpty)
                             Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(24.0),
                                 child: Text(
                                   'No entries today',
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: TherapediaColors.mainText.withOpacity(0.6),
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: TherapediaColors.mainText
+                                            .withOpacity(0.6),
+                                      ),
                                 ),
                               ),
                             ),
@@ -2624,65 +3587,6 @@ class _LogPageState extends State<LogPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // AppBar removed here because LogPage now has its own Tabs that look better without a duplicate AppBar title above it.
-      // Or we can keep it simple. Let's keep it but make it minimal.
-      appBar: AppBar(
-        title: Text(widget.title),
-        elevation: 2,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: TherapediaColors.primaryButton.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'You have pushed the button this many times:',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '$_counter',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: TherapediaColors.primaryButton,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        backgroundColor: TherapediaColors.primaryButton,
-        child: const Icon(Icons.add),
       ),
     );
   }
